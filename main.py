@@ -1,15 +1,20 @@
-from numpy import sort
+import tensorflow as tf
+import numpy as np
+import time
 import praw
-import os
+import json
 import markovify
+import selftext
+import title
+from numpy import sort
 from psaw import PushshiftAPI
-from dotenv import load_dotenv
-from datetime import date
 from functools import cmp_to_key
 
-load_dotenv()
+subr = input("Enter subreddit: ")
+credentials = 'bots.json'
 
-subr = 'subredditbots'
+with open(credentials) as f:
+    creds = json.load(f)
 
 #comparator
 def compare(x, y):
@@ -17,66 +22,28 @@ def compare(x, y):
 
 #praw initialization
 reddit = praw.Reddit(
-    #client_id=os.getenv('REDDIT_CLIENT_ID'),
-    #client_secret=os.getenv('REDDIT_CLIENT_SECRET'),
-    client_id="VefkO3XJsMBeKX6xycc1bA",
-    client_secret="rvjCJGN4jmf-B1WEQp35YXwofGWBMw",
-    user_agent="Bot for simulating /r/askreddit content",
-    username="ask_reddit_bot_0x001",
-    password="LvH65Lq%pzu6F79",
-    #password=os.getenv('REDDIT_PASSWORD'),
-    #refresh_token=os.getenv('REFRESH_TOKEN'),
-    #redirect_uri="http://localhost:8080"
+    client_id=creds['bots']['client_id'],
+    client_secret=creds['bots']['client_secret'],
+    user_agent="script by u/ask_reddit_bot_0x001",
+    username=creds['bots']['username'],
+    password=creds['bots']['password'],
+    redirect_uri=creds['bots']['redirect_uri'],
 )
-
-#print(reddit.user.me())
 
 #pushshift query
 api = PushshiftAPI()
-results = list(api.search_submissions(
-    limit=1000,
+initial_query = list(api.search_submissions(
+    limit=100000,
     mod_removed = False,
     subreddit = "askreddit"
 ))
-top_results = results
-sorted(top_results, key=cmp_to_key(compare))
-top_results=top_results[-20:]
-
-#write data to file
-data = open("data.txt", "w")
-for result in results:
-    data.write(result.title)
-    data.write("\n")
-data.close()
-
-data = open("top_data.txt", "w")
-for result in top_results:
-    data.write(result.title)
-    data.write("\n")
-data.close()
-
-#markovify api
-with open("data.txt") as f:
-    text = f.read()
-text_model_reg = markovify.Text(text)
-
-with open("top_data.txt") as f:
-    text = f.read()
-text_model_top = markovify.Text(text)
-
-text_model = markovify.combine([text_model_reg, text_model_top], [1, 2])
-
-#write to output file
-data = open("generated_content.txt", "w")
-data.write(result.title)
-data.write("\n")
-
-tmp = str(text_model.make_sentence(tries=100, max_overlap_ratio=0.5))
-while tmp == None:
-    tmp = str(text_model.make_sentence(tries=100, test_output = False))
-
+titles = []
+selftexts = []
+for query in initial_query:
+    titles.append(query.title)
+    selftexts.append(query.selftext)
+title_ret = title.gen_title(titles)
+selftext_ret = selftext.gen_title(selftext.gen_selftext(selftexts))
 #post to reddit using praw api
-selftext=""
-#reddit.subreddit(subr).submit(tmp, selftext=selftext)
+#reddit.subreddit(subr).submit(title_ret, selftext=selftext_ret)
 
-data.close()

@@ -1,1 +1,4 @@
-.env
+bots.json
+data.txt
+generated_content.txt
+top_data.txt
