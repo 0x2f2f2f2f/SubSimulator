@@ -47,3 +47,4 @@ def gen_title(query_res):
     title = str(text_model.make_sentence(tries=100, max_overlap_ratio=0.5))
     while title == None:
         title = str(text_model.make_sentence(tries=100, test_output = False))
+    return title

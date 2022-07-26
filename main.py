@@ -1,16 +1,17 @@
 import tensorflow as tf
 import numpy as np
+import os
 import time
 import praw
 import json
 import markovify
-import selftext
+import gentext
 import title
 from numpy import sort
 from psaw import PushshiftAPI
 from functools import cmp_to_key
 
-subr = input("Enter subreddit: ")
+subr = "askreddit"
 credentials = 'bots.json'
 
 with open(credentials) as f:
@@ -33,7 +34,7 @@ reddit = praw.Reddit(
 #pushshift query
 api = PushshiftAPI()
 initial_query = list(api.search_submissions(
-    limit=100000,
+    limit=10,
     mod_removed = False,
     subreddit = "askreddit"
 ))
@@ -42,8 +43,9 @@ selftexts = []
 for query in initial_query:
     titles.append(query.title)
     selftexts.append(query.selftext)
-title_ret = title.gen_title(titles)
-selftext_ret = selftext.gen_title(selftext.gen_selftext(selftexts))
+title_ret = gentext.gen_text(titles)
+selftext_ret = gentext.gen_text(selftexts)
+print(title_ret)
 #post to reddit using praw api
 #reddit.subreddit(subr).submit(title_ret, selftext=selftext_ret)
 
