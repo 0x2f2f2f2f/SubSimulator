@@ -21,7 +21,7 @@ def split_input_target(sequence):
     target_text = sequence[1:]
     return input_text, target_text
 
-def gen_text(query_res):
+def gen_selftext(query_res):
     #open data and obtain vocab for dataset
     data = open("data.txt", "w")
     for result in query_res:
@@ -74,26 +74,3 @@ def gen_text(query_res):
         vocab_size=vocab_size,
         embedding_dim=embedding_dim,
         rnn_units=rnn_units)
-
-    #calculate loss
-    for input_example_batch in dataset.take(1):
-        example_batch_predictions = model(input_example_batch)
-    loss = tf.losses.SparseCategoricalCrossentropy(from_logits=True)
-    example_batch_mean_loss = loss(target_example_batch, example_batch_predictions)
-    tf.exp(example_batch_mean_loss).numpy()
-
-    #do a step in the model to generate some text
-    one_step_model = OneStep(model, chars_from_ids, ids_from_chars)
-    start = time.time()
-    states = None
-    next_char = tf.constant(['ROMEO:'])
-    result = [next_char]
-
-    for n in range(1000):
-        next_char, states = one_step_model.generate_one_step(next_char, states=states)
-        result.append(next_char)
-
-    result = tf.strings.join(result)
-    end = time.time()
-    print(result[0].numpy().decode('utf-8'), '\n\n' + '_'*80)
-    print('\nRun time:', end - start)

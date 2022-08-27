@@ -17,13 +17,13 @@ def gen_title(query_res):
     #write data to file
     data = open("data.txt", "w")
     for result in query_res:
-        data.write(result)
+        data.write(result.title)
         data.write("\n")
     data.close()
 
     data = open("top_data.txt", "w")
     for result in top_results:
-        data.write(top_results)
+        data.write(result.title)
         data.write("\n")
     data.close()
 
@@ -37,12 +37,6 @@ def gen_title(query_res):
     text_model_top = markovify.Text(text)
 
     text_model = markovify.combine([text_model_reg, text_model_top], [1, 2])
-
-    #write to output file
-    data = open("generated_content.txt", "w")
-    data.write(result)
-    data.write("\n")
-    data.close()
 
     title = str(text_model.make_sentence(tries=100, max_overlap_ratio=0.5))
     while title == None:

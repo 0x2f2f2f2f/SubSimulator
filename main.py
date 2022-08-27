@@ -5,7 +5,7 @@ import time
 import praw
 import json
 import markovify
-import gentext
+import selftext
 import title
 from numpy import sort
 from psaw import PushshiftAPI
@@ -34,18 +34,19 @@ reddit = praw.Reddit(
 #pushshift query
 api = PushshiftAPI()
 initial_query = list(api.search_submissions(
-    limit=10,
+    limit=100,
     mod_removed = False,
-    subreddit = "askreddit"
+    subreddit = subr
 ))
 titles = []
 selftexts = []
 for query in initial_query:
-    titles.append(query.title)
-    selftexts.append(query.selftext)
-title_ret = gentext.gen_text(titles)
-selftext_ret = gentext.gen_text(selftexts)
-print(title_ret)
+    titles.append(query)
+    if hasattr(query, 'selftext'):
+        selftexts.append(query.selftext)
+title_ret = title.gen_title(titles)
+selftext_ret = selftext.gen_selftext(selftexts)
+
 #post to reddit using praw api
 #reddit.subreddit(subr).submit(title_ret, selftext=selftext_ret)
 
